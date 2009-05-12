@@ -1,0 +1,14 @@
+<html>
+<body>
+<h1>Cortex Dump</h1>
+<ol>
+{% for dump in dumps %}
+<li>{{dump.text}}</li>
+{% endfor %}
+</ol>
+    <form action="/dump" method="post">
+        <input type="text" name="text" id="text" class="txt"/>
+        <input type="submit" value="Dump"/>
+    </form>
+</body>
+</html>

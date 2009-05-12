@@ -20,18 +20,42 @@
 
 import wsgiref.handlers
 
-
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api import users
+import os
+from google.appengine.ext import db
+from google.appengine.ext.webapp import template
 
+from models import Dump
+
+def write_template(handler,templateFile,template_values):
+    path = os.path.join(os.path.dirname(__file__), templateFile)
+    handler.response.out.write(template.render(path, template_values))
 
 class MainHandler(webapp.RequestHandler):
 
   def get(self):
-    self.response.out.write('Hello world!')
+    user = users.get_current_user()
+    dumps = Dump.all().filter('user =',user)
+    write_template(self,'template/index.html',  { 'dumps': dumps,
+                                                    'user': user, })
+
+class Dumper(webapp.RequestHandler):
+
+    def post(self):
+        text = self.request.get('text')
+        if text:
+            dump = Dump()
+            dump.text = text
+            dump.user = users.get_current_user()
+            dump.put()
+        self.redirect('/')
 
 
 def main():
-  application = webapp.WSGIApplication([('/', MainHandler)],
+  application = webapp.WSGIApplication([('/', MainHandler),
+                                        ('/dump',Dumper)],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
