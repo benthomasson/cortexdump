@@ -1,14 +1,39 @@
 <html>
+<head>
+<script type="text/javascript" src="/static/jquery.js"></script>
+<script type="text/javascript" src="/static/jquery.form.js"></script>
+<script type="text/javascript">
+function clearForm() {
+    document.forms[0].dumptext.value = "";
+}
+$(document).ready(function() { 
+    var options = { 
+        target:        '#dumps',   // target element(s) to be updated with server response 
+        success:       clearForm 
+    };
+ 
+    // bind to the form's submit event 
+    $('#dump').submit(function() { 
+        // inside event callbacks 'this' is the DOM element so we first 
+        // wrap it in a jQuery object and then invoke ajaxSubmit 
+        $(this).ajaxSubmit(options);
+ 
+        // !!! Important !!! 
+        // always return false to prevent standard browser submit and page navigation 
+        return false;
+    });
+});
+ 
+</script>
+</head>
 <body>
 <h1>Cortex Dump</h1>
-<ol>
-{% for dump in dumps %}
-<li>{{dump.text}}</li>
-{% endfor %}
-</ol>
-    <form action="/dump" method="post">
-        <input type="text" name="text" id="text" class="txt"/>
-        <input type="submit" value="Dump"/>
-    </form>
+<div id="dumps">
+{% include 'dumps.html' %}
+</div>
+<form id="dump" action="/dump" method="post">
+    <input type="text" name="dumptext" class="txt"/>
+    <input type="submit" value="Dump"/>
+</form>
 </body>
 </html>

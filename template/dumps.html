@@ -1,0 +1,5 @@
+<ol>
+{% for dump in dumps %}
+<li>{{dump.text}} <a href="/delete/{{dump.key}}">x</a></li>
+{% endfor %}
+</ol>

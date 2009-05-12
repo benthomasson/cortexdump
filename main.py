@@ -44,18 +44,30 @@ class MainHandler(webapp.RequestHandler):
 class Dumper(webapp.RequestHandler):
 
     def post(self):
-        text = self.request.get('text')
+        text = self.request.get('dumptext')
         if text:
             dump = Dump()
             dump.text = text
             dump.user = users.get_current_user()
             dump.put()
-        self.redirect('/')
+        user = users.get_current_user()
+        dumps = Dump.all().filter('user =',user)
+        write_template(self,'template/dumps.html',  { 'dumps': dumps,
+                                                    'user': user, })
 
+
+class Deleter(webapp.RequestHandler):
+
+    def get(self,key):
+        dump = Dump().get(key)
+        if dump.user == users.get_current_user():
+            dump.delete()
+        self.redirect('/')
 
 def main():
   application = webapp.WSGIApplication([('/', MainHandler),
-                                        ('/dump',Dumper)],
+                                        ('/dump',Dumper),
+                                        ('/delete/(.*)',Deleter)],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
