@@ -51,18 +51,39 @@ class MainHandler(webapp.RequestHandler):
 
 class GanglionHandler(webapp.RequestHandler):
 
-  def get(self,key):
-    user = users.get_current_user()
-    ganglion = Ganglion().get(key)
-    dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
-    ganglions = Ganglion.all().filter('user =',user)
-    someGanglions = ganglions.count() > 0
-    write_template(self,'template/index.html',  { 'dumps': dumps,
-                                                  'ganglion': ganglion,
+    def get(self,key):
+        user = users.get_current_user()
+        ganglion = Ganglion().get(key)
+        dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
+        ganglions = Ganglion.all().filter('user =',user)
+        someGanglions = ganglions.count() > 0
+        write_template(self,'template/index.html',  { 'dumps': dumps,
+                                                      'ganglion': ganglion,
                                                   'ganglions': ganglions,
                                                     'someGanglions':
                                                     someGanglions,
                                                     'user': user, })
+
+    def post(self):
+        user = users.get_current_user()
+        key = self.request.get('key')
+        if key:
+            try:
+                ganglion = Ganglion().get(key)
+            except Exception:
+                self.redirect('/')
+                return
+            dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
+            ganglions = Ganglion.all().filter('user =',user)
+            someGanglions = ganglions.count() > 0
+            write_template(self,'template/index.html',  { 'dumps': dumps,
+                                                      'ganglion': ganglion,
+                                                  'ganglions': ganglions,
+                                                    'someGanglions':
+                                                    someGanglions,
+                                                    'user': user, })
+        else:
+            self.redirect('/')
 
 
 class GanglionCreator(webapp.RequestHandler):
@@ -111,7 +132,8 @@ def main():
                                         ('/dump',Dumper),
                                         ('/dump/delete',Deleter),
                                         ('/ganglion/create',GanglionCreator),
-                                        ('/ganglion/(.*)',GanglionHandler)],
+                                        ('/ganglion/(.*)',GanglionHandler),
+                                        ('/ganglion',GanglionHandler)],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

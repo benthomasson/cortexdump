@@ -7,6 +7,9 @@ function clearForm() {
     document.dump.dumptext.value="";
     document.dump.dumptext.focus();
 }
+function selectGanglion() {
+    document.ganglion.submit();
+}
 $(document).ready(function() { 
     var options = { 
         target:        '#dumps',   // target element(s) to be updated with server response 
@@ -31,10 +34,11 @@ $(document).ready(function() {
 <body>
 <h1>Cortex Dump</h1>
 {% if someGanglions %}
-<form id="ganglion" action="" method="post">
-    <select onChange="selectGanglion()">
-    {% for ganglion in ganglions %}
-        <option value="{{ganglion.key}}">{{ganglion.name}}</option>
+<form id="ganglion" name="ganglion" action="/ganglion" method="post">
+    <select onChange="selectGanglion()" name="key">
+    <option value="-">-</option>
+    {% for aGanglion in ganglions %}
+        <option value="{{aGanglion.key}}" {% ifequal aGanglion.key ganglion.key %} SELECTED {%endifequal%}>{{aGanglion.name}}</option>
     {% endfor %}
     </select>
 </form>
