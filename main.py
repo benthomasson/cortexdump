@@ -132,6 +132,20 @@ class Dumper(webapp.RequestHandler):
                                                     'user': user, })
 
 
+
+class DumpChange(webapp.RequestHandler):
+
+    def post(self):
+        key = self.request.get('key')
+        if not key: self.error(404)
+        update_value = self.request.get('update_value')
+        if not update_value: self.error(404)
+        dump = Dump.get(key)
+        if not ganglion: self.error(404)
+        ganglion.name = update_value
+        ganglion.put()
+        self.response.out.write(ganglion.name)
+
 class Deleter(webapp.RequestHandler):
 
     def post(self):
