@@ -1,5 +1,12 @@
-<ol>
+<ul>
 {% for dump in dumps %}
-<li>{{dump.text}} <a href="/delete/{{dump.key}}">x</a></li>
+<li class="dump" id="{{dump.key}}">{{dump.text}} <a class="x" href="">x</a></li>
 {% endfor %}
-</ol>
+</ul>
+<script type="text/javascript"> 
+     $("li.dump a.x").click(function () { 
+           $.post("/dump/delete", { key: $(this).parent().attr("id") } );
+           $(this).parent().slideUp();
+           return false;
+    });
+</script> 

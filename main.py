@@ -27,7 +27,7 @@ import os
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 
-from models import Dump
+from models import Dump, Ganglion
 
 def write_template(handler,templateFile,template_values):
     path = os.path.join(os.path.dirname(__file__), templateFile)
@@ -37,37 +37,81 @@ class MainHandler(webapp.RequestHandler):
 
   def get(self):
     user = users.get_current_user()
+    ganglion = None
     dumps = Dump.all().filter('user =',user)
+    ganglions = Ganglion.all().filter('user =',user)
+    someGanglions = ganglions.count() > 0
     write_template(self,'template/index.html',  { 'dumps': dumps,
+                                                  'ganglion': ganglion,
+                                                  'ganglions': ganglions,
+                                                    'someGanglions':
+                                                    someGanglions,
                                                     'user': user, })
+
+
+class GanglionHandler(webapp.RequestHandler):
+
+  def get(self,key):
+    user = users.get_current_user()
+    ganglion = Ganglion().get(key)
+    dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
+    ganglions = Ganglion.all().filter('user =',user)
+    someGanglions = ganglions.count() > 0
+    write_template(self,'template/index.html',  { 'dumps': dumps,
+                                                  'ganglion': ganglion,
+                                                  'ganglions': ganglions,
+                                                    'someGanglions':
+                                                    someGanglions,
+                                                    'user': user, })
+
+
+class GanglionCreator(webapp.RequestHandler):
+
+    def post(self):
+        ganglion = Ganglion()
+        ganglion.name = 'New'
+        ganglion.user = users.get_current_user()
+        ganglion.put()
+        self.redirect('/ganglion/%s' % ganglion.key())
 
 class Dumper(webapp.RequestHandler):
 
     def post(self):
         text = self.request.get('dumptext')
+        ganglionKey = self.request.get('ganglion')
+        user = users.get_current_user()
+        ganglion = None
         if text:
             dump = Dump()
             dump.text = text
             dump.user = users.get_current_user()
+            if ganglionKey:
+                ganglion = Ganglion.get(ganglionKey)
+                if ganglion.user == user:
+                    dump.ganglion = ganglion
             dump.put()
-        user = users.get_current_user()
         dumps = Dump.all().filter('user =',user)
+        if ganglion:
+            dumps = dumps.filter('ganglion =',ganglion)
         write_template(self,'template/dumps.html',  { 'dumps': dumps,
                                                     'user': user, })
 
 
 class Deleter(webapp.RequestHandler):
 
-    def get(self,key):
-        dump = Dump().get(key)
-        if dump.user == users.get_current_user():
-            dump.delete()
-        self.redirect('/')
+    def post(self):
+        key = self.request.get('key')
+        if key:
+            dump = Dump().get(key)
+            if dump and dump.user == users.get_current_user():
+                dump.delete()
 
 def main():
   application = webapp.WSGIApplication([('/', MainHandler),
                                         ('/dump',Dumper),
-                                        ('/delete/(.*)',Deleter)],
+                                        ('/dump/delete',Deleter),
+                                        ('/ganglion/create',GanglionCreator),
+                                        ('/ganglion/(.*)',GanglionHandler)],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

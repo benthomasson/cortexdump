@@ -4,7 +4,8 @@
 <script type="text/javascript" src="/static/jquery.form.js"></script>
 <script type="text/javascript">
 function clearForm() {
-    document.forms[0].dumptext.value = "";
+    document.dump.dumptext.value="";
+    document.dump.dumptext.focus();
 }
 $(document).ready(function() { 
     var options = { 
@@ -22,18 +23,37 @@ $(document).ready(function() {
         // always return false to prevent standard browser submit and page navigation 
         return false;
     });
+    document.dump.dumptext.focus();
 });
  
 </script>
 </head>
 <body>
 <h1>Cortex Dump</h1>
+{% if someGanglions %}
+<form id="ganglion" action="" method="post">
+    <select onChange="selectGanglion()">
+    {% for ganglion in ganglions %}
+        <option value="{{ganglion.key}}">{{ganglion.name}}</option>
+    {% endfor %}
+    </select>
+</form>
+{% endif %}
+{% if ganglion %} 
+<h2>{{ganglion.name}}</h2>
+{% endif %}
 <div id="dumps">
 {% include 'dumps.html' %}
 </div>
-<form id="dump" action="/dump" method="post">
-    <input type="text" name="dumptext" class="txt"/>
+<form id="dump" name="dump" action="/dump" method="post">
+    <input type="text" name="dumptext" id="dumptext" class="txt"/>
+{% if ganglion %} 
+    <input type="hidden" name="ganglion" value="{{ganglion.key}}"/>
+{% endif %}
     <input type="submit" value="Dump"/>
+</form>
+<form id="dump" action="/ganglion/create" method="post">
+    <input type="submit" value="New Ganglion"/>
 </form>
 </body>
 </html>
