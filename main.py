@@ -39,13 +39,13 @@ class MainHandler(webapp.RequestHandler):
     user = users.get_current_user()
     ganglion = None
     dumps = Dump.all().filter('user =',user)
-    ganglions = Ganglion.all().filter('user =',user)
-    someGanglions = ganglions.count() > 0
+    ganglia = Ganglion.all().filter('user =',user)
+    someGanglia = ganglia.count() > 0
     write_template(self,'template/index.html',  { 'dumps': dumps,
                                                   'ganglion': ganglion,
-                                                  'ganglions': ganglions,
-                                                    'someGanglions':
-                                                    someGanglions,
+                                                  'ganglia': ganglia,
+                                                    'someGanglia':
+                                                    someGanglia,
                                                     'user': user, })
 
 
@@ -55,13 +55,13 @@ class GanglionHandler(webapp.RequestHandler):
         user = users.get_current_user()
         ganglion = Ganglion().get(key)
         dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
-        ganglions = Ganglion.all().filter('user =',user)
-        someGanglions = ganglions.count() > 0
+        ganglia = Ganglion.all().filter('user =',user)
+        someGanglia = ganglia.count() > 0
         write_template(self,'template/index.html',  { 'dumps': dumps,
                                                       'ganglion': ganglion,
-                                                  'ganglions': ganglions,
-                                                    'someGanglions':
-                                                    someGanglions,
+                                                  'ganglia': ganglia,
+                                                    'someGanglia':
+                                                    someGanglia,
                                                     'user': user, })
 
     def post(self):
@@ -74,16 +74,30 @@ class GanglionHandler(webapp.RequestHandler):
                 self.redirect('/')
                 return
             dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
-            ganglions = Ganglion.all().filter('user =',user)
-            someGanglions = ganglions.count() > 0
+            ganglia = Ganglion.all().filter('user =',user)
+            someGanglia = ganglia.count() > 0
             write_template(self,'template/index.html',  { 'dumps': dumps,
                                                       'ganglion': ganglion,
-                                                  'ganglions': ganglions,
-                                                    'someGanglions':
-                                                    someGanglions,
+                                                  'ganglia': ganglia,
+                                                    'someGanglia':
+                                                    someGanglia,
                                                     'user': user, })
         else:
             self.redirect('/')
+
+
+class GanglionChange(webapp.RequestHandler):
+
+    def post(self):
+        key = self.request.get('key')
+        if not key: self.error(404)
+        update_value = self.request.get('update_value')
+        if not update_value: self.error(404)
+        ganglion = Ganglion.get(key)
+        if not ganglion: self.error(404)
+        ganglion.name = update_value
+        ganglion.put()
+        self.response.out.write(ganglion.name)
 
 
 class GanglionCreator(webapp.RequestHandler):
@@ -132,6 +146,7 @@ def main():
                                         ('/dump',Dumper),
                                         ('/dump/delete',Deleter),
                                         ('/ganglion/create',GanglionCreator),
+                                        ('/ganglion/change',GanglionChange),
                                         ('/ganglion/(.*)',GanglionHandler),
                                         ('/ganglion',GanglionHandler)],
                                        debug=True)

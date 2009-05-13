@@ -2,6 +2,7 @@
 <head>
 <script type="text/javascript" src="/static/jquery.js"></script>
 <script type="text/javascript" src="/static/jquery.form.js"></script>
+<script type="text/javascript" src="/static/jquery.editinplace.js"></script>
 <script type="text/javascript">
 function clearForm() {
     document.dump.dumptext.value="";
@@ -27,24 +28,32 @@ $(document).ready(function() {
         return false;
     });
     document.dump.dumptext.focus();
+    {% if ganglion %}
+    $(".editme").editInPlace({
+        url: "/ganglion/change",
+        params: "key={{ganglion.key}}",
+        show_buttons: true    });
+    {% endif %}
 });
  
 </script>
 </head>
 <body>
 <h1>Cortex Dump</h1>
-{% if someGanglions %}
+<div id="ganglionList">
+{% if someGanglia %}
 <form id="ganglion" name="ganglion" action="/ganglion" method="post">
     <select onChange="selectGanglion()" name="key">
     <option value="-">-</option>
-    {% for aGanglion in ganglions %}
+    {% for aGanglion in ganglia %}
         <option value="{{aGanglion.key}}" {% ifequal aGanglion.key ganglion.key %} SELECTED {%endifequal%}>{{aGanglion.name}}</option>
     {% endfor %}
     </select>
 </form>
 {% endif %}
+</div>
 {% if ganglion %} 
-<h2>{{ganglion.name}}</h2>
+<h2 class="editme">{{ganglion.name}}</h2>
 {% endif %}
 <div id="dumps">
 {% include 'dumps.html' %}
