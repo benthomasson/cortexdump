@@ -51,6 +51,9 @@ $(document).ready(function() {
     </select>
 </form>
 {% endif %}
+<form action="/ganglion/create" method="post">
+    <input type="submit" value="New Ganglion"/>
+</form>
 </div>
 {% if ganglion %} 
 <h2 class="editme">{{ganglion.name}}</h2>
@@ -64,9 +67,6 @@ $(document).ready(function() {
     <input type="hidden" name="ganglion" value="{{ganglion.key}}"/>
 {% endif %}
     <input type="submit" value="Dump"/>
-</form>
-<form id="dump" action="/ganglion/create" method="post">
-    <input type="submit" value="New Ganglion"/>
 </form>
 </body>
 </html>
