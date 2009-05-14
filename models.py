@@ -7,6 +7,7 @@ class Ganglion(db.Model):
 class Dump(db.Model):
     text = db.StringProperty()
     user = db.UserProperty()
+    order = db.IntegerProperty(default=1001)
     ganglion = db.ReferenceProperty(Ganglion)
 
 

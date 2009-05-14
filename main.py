@@ -26,6 +26,7 @@ from google.appengine.api import users
 import os
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+#import logging
 
 from models import Dump, Ganglion
 
@@ -39,6 +40,7 @@ class MainHandler(webapp.RequestHandler):
     user = users.get_current_user()
     ganglion = None
     dumps = Dump.all().filter('user =',user)
+    dumps = dumps.order('order')
     ganglia = Ganglion.all().filter('user =',user)
     someGanglia = ganglia.count() > 0
     write_template(self,'template/index.html',  { 'dumps': dumps,
@@ -55,6 +57,7 @@ class GanglionHandler(webapp.RequestHandler):
         user = users.get_current_user()
         ganglion = Ganglion().get(key)
         dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
+        dumps = dumps.order('order')
         ganglia = Ganglion.all().filter('user =',user)
         someGanglia = ganglia.count() > 0
         write_template(self,'template/index.html',  { 'dumps': dumps,
@@ -74,6 +77,7 @@ class GanglionHandler(webapp.RequestHandler):
                 self.redirect('/')
                 return
             dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
+            dumps = dumps.order('order')
             ganglia = Ganglion.all().filter('user =',user)
             someGanglia = ganglia.count() > 0
             write_template(self,'template/index.html',  { 'dumps': dumps,
@@ -99,6 +103,24 @@ class GanglionChange(webapp.RequestHandler):
         ganglion.put()
         self.response.out.write(ganglion.name)
 
+
+class GanglionSorter(webapp.RequestHandler):
+
+    def post(self,key):
+        user = users.get_current_user()
+        ganglion = Ganglion().get(key)
+        if not ganglion: return 
+        #logging.debug(repr(self.request.arguments()))
+        order = 1
+        for dumpKey in self.request.get_all('dump[]'):
+            #logging.debug(dumpKey)
+            dump = Dump.get(dumpKey)
+            if dump:
+                #logging.debug("order %s" % order)
+                dump.order = order
+                dump.put()
+            order += 1
+        return
 
 class GanglionCreator(webapp.RequestHandler):
 
@@ -128,7 +150,9 @@ class Dumper(webapp.RequestHandler):
         dumps = Dump.all().filter('user =',user)
         if ganglion:
             dumps = dumps.filter('ganglion =',ganglion)
+        dumps = dumps.order('order')
         write_template(self,'template/dumps.html',  { 'dumps': dumps,
+                                                      'ganglion': ganglion,
                                                     'user': user, })
 
 
@@ -161,6 +185,7 @@ def main():
                                         ('/dump/delete',Deleter),
                                         ('/ganglion/create',GanglionCreator),
                                         ('/ganglion/change',GanglionChange),
+                                        ('/ganglion/sort/(.*)',GanglionSorter),
                                         ('/ganglion/(.*)',GanglionHandler),
                                         ('/ganglion',GanglionHandler)],
                                        debug=True)
