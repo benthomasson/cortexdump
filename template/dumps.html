@@ -4,7 +4,12 @@
 {% endfor %}
 </ul>
 
-
+<script type="text/javascript">
+$(function() {
+    $("#sortable").sortable();
+    $("#sortable").disableSelection();
+});
+</script>
 
 <script type="text/javascript"> 
      $("li.dump a.x").click(function () { 
