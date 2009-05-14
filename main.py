@@ -179,6 +179,16 @@ class Deleter(webapp.RequestHandler):
             if dump and dump.user == users.get_current_user():
                 dump.delete()
 
+class Migration(webapp.RequestHandler):
+
+    def get(self):
+        dumps = Dump.all()
+        for dump in dumps.fetch(1000):
+            self.response.out.write(dump.text)
+            self.response.out.write('<br>')
+            dump.order = 1001
+            dump.put()
+
 def main():
   application = webapp.WSGIApplication([('/', MainHandler),
                                         ('/dump',Dumper),
@@ -187,7 +197,9 @@ def main():
                                         ('/ganglion/change',GanglionChange),
                                         ('/ganglion/sort/(.*)',GanglionSorter),
                                         ('/ganglion/(.*)',GanglionHandler),
-                                        ('/ganglion',GanglionHandler)],
+                                        ('/ganglion',GanglionHandler),
+                                        #('/migrate',Migration),
+                                        ],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
