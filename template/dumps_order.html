@@ -1,0 +1,20 @@
+{% include 'dumps_plain.html' %}
+
+<script type="text/javascript">
+$(function() {
+    $("#sortable").sortable({
+        {% if ganglion %}
+        update: function() { 
+            serial = $('#sortable').sortable('serialize');
+            $.ajax({
+                url: "/ganglion/sort/{{ganglion.key}}",
+                type: "post",
+                data: serial,
+                error: function () { alert('Brain slug!');}
+            });
+        }
+        {% endif %}
+    });
+    /*$("#sortable").disableSelection();*/
+});
+</script>

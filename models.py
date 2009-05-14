@@ -1,5 +1,9 @@
 from google.appengine.ext import db
 
+class Cortex(db.Model):
+    user = db.UserProperty()
+    viewMode = db.StringProperty(default="plain")
+
 class Ganglion(db.Model):
     name = db.StringProperty()
     user = db.UserProperty()

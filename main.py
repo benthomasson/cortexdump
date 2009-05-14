@@ -28,48 +28,77 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 #import logging
 
-from models import Dump, Ganglion
+from models import Dump, Ganglion, Cortex
 
 def write_template(handler,templateFile,template_values):
     path = os.path.join(os.path.dirname(__file__), templateFile)
     handler.response.out.write(template.render(path, template_values))
 
+def getDumpsTemplate(cortex):
+    if cortex.viewMode == "plain":
+        return 'dumps_plain.html'
+    elif cortex.viewMode == "order":
+        return 'dumps_order.html'
+    elif cortex.viewMode == "detail":
+        return 'dumps_detail.html'
+    else:
+        return 'dumps_plain.html'
+
+
+def getCortex(user):
+    cortex = Cortex.all().filter('user =', user).fetch(1)
+    if not cortex:
+        cortex = Cortex()
+        cortex.user = user
+        cortex.put()
+    else:
+        cortex = cortex[0]
+    return cortex
+
+
 class MainHandler(webapp.RequestHandler):
 
   def get(self):
     user = users.get_current_user()
+    cortex = getCortex(user)
     ganglion = None
     dumps = Dump.all().filter('user =',user)
     dumps = dumps.order('order')
     ganglia = Ganglion.all().filter('user =',user)
     someGanglia = ganglia.count() > 0
-    write_template(self,'template/index.html',  { 'dumps': dumps,
-                                                  'ganglion': ganglion,
-                                                  'ganglia': ganglia,
-                                                    'someGanglia':
-                                                    someGanglia,
-                                                    'user': user, })
+    write_template(self,'template/index.html',\
+        { 'dumps': dumps,
+          'dumpsTemplate': getDumpsTemplate(cortex),
+          'ganglion': ganglion,
+          'ganglia': ganglia,
+            'someGanglia':
+            someGanglia,
+            'user': user, })
 
 
 class GanglionHandler(webapp.RequestHandler):
 
     def get(self,key):
         user = users.get_current_user()
+        cortex = getCortex(user)
         ganglion = Ganglion().get(key)
         dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
         dumps = dumps.order('order')
         ganglia = Ganglion.all().filter('user =',user)
         someGanglia = ganglia.count() > 0
-        write_template(self,'template/index.html',  { 'dumps': dumps,
-                                                      'ganglion': ganglion,
-                                                  'ganglia': ganglia,
-                                                    'someGanglia':
-                                                    someGanglia,
-                                                    'user': user, })
+        write_template(self,'template/index.html', \
+            { 'dumps': dumps,
+              'ganglion': ganglion,
+              'dumpsTemplate': getDumpsTemplate(cortex),
+              'ganglia': ganglia,
+                'someGanglia':
+                someGanglia,
+                'user': user, })
 
     def post(self):
         user = users.get_current_user()
         key = self.request.get('key')
+        cortex = getCortex(user)
         if key:
             try:
                 ganglion = Ganglion().get(key)
@@ -80,12 +109,14 @@ class GanglionHandler(webapp.RequestHandler):
             dumps = dumps.order('order')
             ganglia = Ganglion.all().filter('user =',user)
             someGanglia = ganglia.count() > 0
-            write_template(self,'template/index.html',  { 'dumps': dumps,
-                                                      'ganglion': ganglion,
-                                                  'ganglia': ganglia,
-                                                    'someGanglia':
-                                                    someGanglia,
-                                                    'user': user, })
+            write_template(self,'template/index.html', \
+                { 'dumps': dumps,
+                  'dumpsTemplate': getDumpsTemplate(cortex),
+                  'ganglion': ganglion,
+                  'ganglia': ganglia,
+                  'someGanglia':
+                  someGanglia,
+                  'user': user, })
         else:
             self.redirect('/')
 
@@ -134,27 +165,31 @@ class GanglionCreator(webapp.RequestHandler):
 class Dumper(webapp.RequestHandler):
 
     def post(self):
+        ganglion = None
         text = self.request.get('dumptext')
         ganglionKey = self.request.get('ganglion')
+        if ganglionKey:
+            ganglion = Ganglion.get(ganglionKey)
         user = users.get_current_user()
-        ganglion = None
+        cortex = getCortex(user)
         if text:
             dump = Dump()
             dump.text = text
             dump.user = users.get_current_user()
-            if ganglionKey:
-                ganglion = Ganglion.get(ganglionKey)
-                if ganglion.user == user:
-                    dump.ganglion = ganglion
+            if ganglion and ganglion.user == user:
+                dump.ganglion = ganglion
             dump.put()
         dumps = Dump.all().filter('user =',user)
         if ganglion:
             dumps = dumps.filter('ganglion =',ganglion)
         dumps = dumps.order('order')
-        write_template(self,'template/dumps.html',  { 'dumps': dumps,
-                                                      'ganglion': ganglion,
-                                                    'user': user, })
+        write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
+            { 'dumps': dumps,
+              'ganglion': ganglion,
+              'user': user, })
 
+    def get(self):
+        return self.post()
 
 
 class DumpChange(webapp.RequestHandler):
@@ -189,6 +224,26 @@ class Migration(webapp.RequestHandler):
             dump.order = 1001
             dump.put()
 
+class ViewHandler(webapp.RequestHandler):
+
+    def post(self,view):
+        user = users.get_current_user()
+        cortex = getCortex(user)
+        cortex.viewMode = view
+        cortex.put()
+        ganglionKey = self.request.get('ganglion')
+        if ganglionKey:
+            ganglion = Ganglion.get(ganglionKey)
+        dumps = Dump.all().filter('user =',user)
+        if ganglion:
+            dumps = dumps.filter('ganglion =',ganglion)
+        dumps = dumps.order('order')
+        write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
+            { 'dumps': dumps,
+              'ganglion': ganglion,
+              'user': user, })
+
+
 def main():
   application = webapp.WSGIApplication([('/', MainHandler),
                                         ('/dump',Dumper),
@@ -198,6 +253,7 @@ def main():
                                         ('/ganglion/sort/(.*)',GanglionSorter),
                                         ('/ganglion/(.*)',GanglionHandler),
                                         ('/ganglion',GanglionHandler),
+                                        ('/view/(.*)',ViewHandler),
                                         #('/migrate',Migration),
                                         ],
                                        debug=True)
