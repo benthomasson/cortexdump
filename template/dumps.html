@@ -1,8 +1,11 @@
-<ul>
+<ul id="sortable">
 {% for dump in dumps %}
 <li class="dump" id="{{dump.key}}">{{dump.text}} <a class="x" href="">x</a></li>
 {% endfor %}
 </ul>
+
+
+
 <script type="text/javascript"> 
      $("li.dump a.x").click(function () { 
            $.post("/dump/delete", { key: $(this).parent().attr("id") } );
