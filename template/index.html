@@ -5,6 +5,10 @@
 {
     float: left;
 }
+#accordian
+{
+    text-decoration: none
+}
 </style>
 <script type="text/javascript" src="/static/jquery.js"></script>
 <script type="text/javascript" src="/static/jquery-ui.js"></script>
@@ -28,9 +32,6 @@ $(document).ready(function() {
         $(this).ajaxSubmit(options);
         return false;
     });
-    var options = { 
-        target:        '#dumps',   // target element(s) to be updated with server response 
-    }
     $('#plain').submit(function() { 
         $(this).ajaxSubmit(options);
         return false;

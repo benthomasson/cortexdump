@@ -26,7 +26,7 @@ from google.appengine.api import users
 import os
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
-#import logging
+import logging
 
 from models import Dump, Ganglion, Cortex
 
@@ -135,6 +135,20 @@ class GanglionChange(webapp.RequestHandler):
         self.response.out.write(ganglion.name)
 
 
+class DumpDetail(webapp.RequestHandler):
+
+    def post(self):
+        key = self.request.get('element_id')
+        logging.debug('key ' + key)
+        if not key: self.error(404)
+        update_value = self.request.get('update_value')
+        if not update_value: self.error(404)
+        ganglion = Dump.get(key)
+        if not ganglion: self.error(404)
+        ganglion.detail = update_value
+        ganglion.put()
+        self.response.out.write(ganglion.detail)
+
 class GanglionSorter(webapp.RequestHandler):
 
     def post(self,key):
@@ -157,7 +171,7 @@ class GanglionCreator(webapp.RequestHandler):
 
     def post(self):
         ganglion = Ganglion()
-        ganglion.name = 'New'
+        ganglion.name = 'New (Click to change)'
         ganglion.user = users.get_current_user()
         ganglion.put()
         self.redirect('/ganglion/%s' % ganglion.key())
@@ -247,6 +261,7 @@ class ViewHandler(webapp.RequestHandler):
 def main():
   application = webapp.WSGIApplication([('/', MainHandler),
                                         ('/dump',Dumper),
+                                        ('/dump/detail',DumpDetail),
                                         ('/dump/delete',Deleter),
                                         ('/ganglion/create',GanglionCreator),
                                         ('/ganglion/change',GanglionChange),

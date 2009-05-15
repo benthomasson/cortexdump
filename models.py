@@ -13,5 +13,6 @@ class Dump(db.Model):
     user = db.UserProperty()
     order = db.IntegerProperty(default=1001)
     ganglion = db.ReferenceProperty(Ganglion)
+    detail = db.TextProperty()
 
 
