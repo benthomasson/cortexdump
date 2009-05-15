@@ -10,7 +10,7 @@ function dumpChecked(input) {
 {% for dump in dumps %}
 <li class="dump" key="{{dump.key}}" id="dump_{{dump.key}}">
 <input id="{{dump.key}}" type="checkbox" {%if dump.checked %} checked="yes" {%endif%} onclick="dumpChecked($(this));">
-{{dump.text}} <a class="x" href="">x</a>
+{{dump.getHtml}} <a class="x" href="">x</a>
 </li>
 {% endfor %}
 </ul>

@@ -144,8 +144,7 @@ class DumpEdit(webapp.RequestHandler):
         if not update_value: self.error(404)
         dump = Dump.get(key)
         if not dump: self.error(404)
-        dump.text = update_value
-        dump.put()
+        dump.processNewText(update_value)
         self.response.out.write(dump.text)
 
 
@@ -224,11 +223,10 @@ class Dumper(webapp.RequestHandler):
         cortex = getCortex(user)
         if text:
             dump = Dump()
-            dump.text = text
             dump.user = users.get_current_user()
             if ganglion and ganglion.user == user:
                 dump.ganglion = ganglion
-            dump.put()
+            dump.processNewText(text)
         if ganglion:
             dumps = ganglion.dump_set.order('order')
         else:

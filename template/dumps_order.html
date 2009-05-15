@@ -2,7 +2,7 @@
 <span style="cursor: pointer;">
 <ul id="sortable">
 {% for dump in dumps %}
-<li class="dump" key="{{dump.key}}" id="dump_{{dump.key}}"> {{dump.text}}</li>
+<li class="dump" key="{{dump.key}}" id="dump_{{dump.key}}"> {{dump.getHtml}}</li>
 {% endfor %}
 </span>
 </ul>
