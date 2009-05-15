@@ -1,6 +1,7 @@
+<p>(Click to view details)</p>
 <ul class="accordion">
 {% for dump in dumps %}
-<li class="head">{{dump.text}}</li>
+<li class="head">{{dump.text}} {%if dump.detail %}*{%endif%}</li>
 <div>
 <pre class="editdump" id="{{dump.key}}">
 {% if dump.detail %}{{dump.detail}}{% else %}(Click to add something){% endif %}
