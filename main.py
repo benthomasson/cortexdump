@@ -261,10 +261,11 @@ class ViewHandler(webapp.RequestHandler):
         cortex = getCortex(user)
         cortex.viewMode = view
         cortex.put()
+        dumps = Dump.all().filter('user =',user)
         ganglionKey = self.request.get('ganglion')
+        ganglion = None
         if ganglionKey:
             ganglion = Ganglion.get(ganglionKey)
-        dumps = Dump.all().filter('user =',user)
         if ganglion:
             dumps = dumps.filter('ganglion =',ganglion)
         dumps = dumps.order('order')
