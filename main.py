@@ -84,8 +84,7 @@ class GanglionHandler(webapp.RequestHandler):
         user = users.get_current_user()
         cortex = getCortex(user)
         ganglion = Ganglion().get(key)
-        dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
-        dumps = dumps.order('order')
+        dumps = ganglion.dump_set.order('order')
         ganglia = Ganglion.all().filter('user =',user)
         someGanglia = ganglia.count() > 0
         write_template(self,'template/index.html', \
@@ -107,8 +106,7 @@ class GanglionHandler(webapp.RequestHandler):
             except Exception:
                 self.redirect('/')
                 return
-            dumps = Dump.all().filter('user =',user).filter('ganglion =', ganglion)
-            dumps = dumps.order('order')
+            dumps = ganglion.dump_set.order('order')
             ganglia = Ganglion.all().filter('user =',user)
             someGanglia = ganglia.count() > 0
             write_template(self,'template/index.html', \
@@ -151,6 +149,24 @@ class DumpEdit(webapp.RequestHandler):
         self.response.out.write(dump.text)
 
 
+class DumpChecked(webapp.RequestHandler):
+
+    def post(self):
+        key = self.request.get('id')
+        logging.debug('key ' + key)
+        if not key: self.error(404)
+        checked = self.request.get('checked')
+        logging.debug('checked ' + checked)
+        if not checked: self.error(404)
+        dump = Dump.get(key)
+        if not dump: self.error(404)
+        if checked == "true":
+            dump.checked = True 
+        else:
+            dump.checked = False
+        dump.put()
+        return
+
 class DumpDetail(webapp.RequestHandler):
 
     def post(self):
@@ -170,17 +186,21 @@ class GanglionSorter(webapp.RequestHandler):
     def post(self,key):
         user = users.get_current_user()
         ganglion = Ganglion().get(key)
-        if not ganglion: return 
+        if not ganglion:
+            logging.debug("Cannot find ganglion %s" % key)
+            return
+        logging.debug("Sorting %s" % key)
         #logging.debug(repr(self.request.arguments()))
         order = 1
         for dumpKey in self.request.get_all('dump[]'):
-            #logging.debug(dumpKey)
+            logging.debug(dumpKey)
             dump = Dump.get(dumpKey)
             if dump:
-                #logging.debug("order %s" % order)
+                logging.debug("order %s" % order)
                 dump.order = order
                 dump.put()
             order += 1
+        logging.debug("%s items sorted" % order)
         return
 
 class GanglionCreator(webapp.RequestHandler):
@@ -209,10 +229,10 @@ class Dumper(webapp.RequestHandler):
             if ganglion and ganglion.user == user:
                 dump.ganglion = ganglion
             dump.put()
-        dumps = Dump.all().filter('user =',user)
         if ganglion:
-            dumps = dumps.filter('ganglion =',ganglion)
-        dumps = dumps.order('order')
+            dumps = ganglion.dump_set.order('order')
+        else:
+            dumps = Dump.all().filter('user =',user)
         write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
             { 'dumps': dumps,
               'ganglion': ganglion,
@@ -261,14 +281,14 @@ class ViewHandler(webapp.RequestHandler):
         cortex = getCortex(user)
         cortex.viewMode = view
         cortex.put()
-        dumps = Dump.all().filter('user =',user)
         ganglionKey = self.request.get('ganglion')
         ganglion = None
         if ganglionKey:
             ganglion = Ganglion.get(ganglionKey)
         if ganglion:
-            dumps = dumps.filter('ganglion =',ganglion)
-        dumps = dumps.order('order')
+            dumps = ganglion.dump_set.order('order')
+        else:
+            dumps = Dump.all().filter('user =',user)
         write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
             { 'dumps': dumps,
               'ganglion': ganglion,
@@ -279,6 +299,7 @@ def main():
   application = webapp.WSGIApplication([('/', MainHandler),
                                         ('/dump',Dumper),
                                         ('/dump/edit',DumpEdit),
+                                        ('/dump/checked',DumpChecked),
                                         ('/dump/detail',DumpDetail),
                                         ('/dump/delete',Deleter),
                                         ('/ganglion/create',GanglionCreator),

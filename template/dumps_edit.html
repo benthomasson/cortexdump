@@ -1,8 +1,10 @@
 <p>(Click to edit)</p>
 <ul>
 {% for dump in dumps %}
+<span style="cursor: pointer;">
 <li class="editdump" id="{{dump.key}}"> {{dump.text}} </li>
 {% endfor %}
+</span>
 </ul>
 
 <script type="text/javascript">

@@ -1,8 +1,10 @@
 <p>(Drag and drop to order)</p>
+<span style="cursor: pointer;">
 <ul id="sortable">
 {% for dump in dumps %}
 <li class="dump" key="{{dump.key}}" id="dump_{{dump.key}}"> {{dump.text}}</li>
 {% endfor %}
+</span>
 </ul>
 
 
@@ -21,6 +23,6 @@ $(function() {
         }
         {% endif %}
     });
-    /*$("#sortable").disableSelection();*/
+    $("#sortable").disableSelection();
 });
 </script>

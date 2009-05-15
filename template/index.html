@@ -23,8 +23,8 @@ body
 <script type="text/javascript" src="/static/jquery.editinplace.js"></script>
 <script type="text/javascript">
 function clearForm() {
-    document.dump.dumptext.value="";
-    document.dump.dumptext.focus();
+    document.formdump.dumptext.value="";
+    document.formdump.dumptext.focus();
 }
 function selectGanglion() {
     document.ganglion.submit();
@@ -35,7 +35,7 @@ $(document).ready(function() {
         success:       clearForm 
     };
     // bind to the form's submit event 
-    $('#dump').submit(function() { 
+    $('#formdump').submit(function() { 
         $(this).ajaxSubmit(options);
         return false;
     });
@@ -55,7 +55,7 @@ $(document).ready(function() {
         $(this).ajaxSubmit(options);
         return false;
     });
-    document.dump.dumptext.focus();
+    document.formdump.dumptext.focus();
     {% if ganglion %}
     $(".editme").editInPlace({
         url: "/ganglion/change",
@@ -74,7 +74,11 @@ $(document).ready(function() {
 <a href="/"> [ This Page ] </a>
 {% endif %}
 </div>
+{% if ganglion %} 
+<h2 class="editme">{{ganglion.name}}</h2>
+{% else %}
 <h1>Cortex Dump</h1>
+{% endif %}
 <div id="ganglionList">
 <form class="floatright" id="ganglion" name="ganglion" action="/ganglion" method="post">
     <select onChange="selectGanglion()" name="key">
@@ -112,13 +116,10 @@ $(document).ready(function() {
     <input type="submit" value="Detail"/>
 </form>
 </div>
-{% if ganglion %} 
-<h2 class="editme">{{ganglion.name}}</h2>
-{% endif %}
 <div id="dumps">
 {% include dumpsTemplate %}
 </div>
-<form id="dump" name="dump" action="/dump" method="post">
+<form id="formdump" name="formdump" action="/dump" method="post">
     <input type="text" name="dumptext" id="dumptext" class="txt"/>
 {% if ganglion %} 
     <input type="hidden" name="ganglion" value="{{ganglion.key}}"/>

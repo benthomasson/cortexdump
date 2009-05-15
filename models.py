@@ -14,5 +14,6 @@ class Dump(db.Model):
     order = db.IntegerProperty(default=1001)
     ganglion = db.ReferenceProperty(Ganglion)
     detail = db.TextProperty()
+    checked = db.BooleanProperty(default=False)
 
 
