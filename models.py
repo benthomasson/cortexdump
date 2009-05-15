@@ -2,7 +2,7 @@ from google.appengine.ext import db
 
 class Cortex(db.Model):
     user = db.UserProperty()
-    viewMode = db.StringProperty(default="plain")
+    viewMode = db.StringProperty(default="mark")
 
 class Ganglion(db.Model):
     name = db.StringProperty()

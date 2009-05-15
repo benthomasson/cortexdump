@@ -15,7 +15,7 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 223 times in query history.
+# Used 241 times in query history.
 - kind: Dump
   properties:
   - name: ganglion

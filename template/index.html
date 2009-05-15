@@ -1,6 +1,9 @@
 <html>
 <head>
 <style type="text/css" media="screen">
+body 
+{
+}
 .floatleft
 {
     float: left;
@@ -36,7 +39,7 @@ $(document).ready(function() {
         $(this).ajaxSubmit(options);
         return false;
     });
-    $('#plain').submit(function() { 
+    $('#mark').submit(function() { 
         $(this).ajaxSubmit(options);
         return false;
     });
@@ -73,7 +76,7 @@ $(document).ready(function() {
 </div>
 <h1>Cortex Dump</h1>
 <div id="ganglionList">
-<form class="floatleft" id="ganglion" name="ganglion" action="/ganglion" method="post">
+<form class="floatright" id="ganglion" name="ganglion" action="/ganglion" method="post">
     <select onChange="selectGanglion()" name="key">
     <option value="-">-</option>
     {% for aGanglion in ganglia %}
@@ -81,14 +84,14 @@ $(document).ready(function() {
     {% endfor %}
     </select>
 </form>
-<form action="/ganglion/create" method="post">
+<form class="floatright" action="/ganglion/create" method="post">
     <input type="submit" value="New Ganglion"/>
 </form>
-<form id="plain" class="floatleft" action="/view/plain" method="post">
+<form id="mark" class="floatleft" action="/view/mark" method="post">
 {% if ganglion %} 
     <input type="hidden" name="ganglion" value="{{ganglion.key}}"/>
 {% endif %}
-    <input type="submit" value="Plain"/>
+    <input type="submit" value="Mark"/>
 </form>
 <form id="order" class="floatleft" action="/view/order" method="post">
 {% if ganglion %} 

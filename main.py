@@ -35,8 +35,8 @@ def write_template(handler,templateFile,template_values):
     handler.response.out.write(template.render(path, template_values))
 
 def getDumpsTemplate(cortex):
-    if cortex.viewMode == "plain":
-        return 'dumps_plain.html'
+    if cortex.viewMode == "mark":
+        return 'dumps_mark.html'
     elif cortex.viewMode == "order":
         return 'dumps_order.html'
     elif cortex.viewMode == "edit":
@@ -44,7 +44,7 @@ def getDumpsTemplate(cortex):
     elif cortex.viewMode == "detail":
         return 'dumps_detail.html'
     else:
-        return 'dumps_plain.html'
+        return 'dumps_mark.html'
 
 
 def getCortex(user):
