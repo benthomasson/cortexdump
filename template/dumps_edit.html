@@ -1,0 +1,12 @@
+<p>(Click to edit)</p>
+<ul>
+{% for dump in dumps %}
+<li class="editdump" id="{{dump.key}}"> {{dump.text}} </li>
+{% endfor %}
+</ul>
+
+<script type="text/javascript">
+$(".editdump").editInPlace({
+    url: "/dump/edit",
+    show_buttons: true    });
+</script>

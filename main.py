@@ -39,6 +39,8 @@ def getDumpsTemplate(cortex):
         return 'dumps_plain.html'
     elif cortex.viewMode == "order":
         return 'dumps_order.html'
+    elif cortex.viewMode == "edit":
+        return 'dumps_edit.html'
     elif cortex.viewMode == "detail":
         return 'dumps_detail.html'
     else:
@@ -134,6 +136,20 @@ class GanglionChange(webapp.RequestHandler):
         ganglion.put()
         self.response.out.write(ganglion.name)
 
+class DumpEdit(webapp.RequestHandler):
+
+    def post(self):
+        key = self.request.get('element_id')
+        logging.debug('key ' + key)
+        if not key: self.error(404)
+        update_value = self.request.get('update_value')
+        if not update_value: self.error(404)
+        dump = Dump.get(key)
+        if not dump: self.error(404)
+        dump.text = update_value
+        dump.put()
+        self.response.out.write(dump.text)
+
 
 class DumpDetail(webapp.RequestHandler):
 
@@ -143,11 +159,11 @@ class DumpDetail(webapp.RequestHandler):
         if not key: self.error(404)
         update_value = self.request.get('update_value')
         if not update_value: self.error(404)
-        ganglion = Dump.get(key)
-        if not ganglion: self.error(404)
-        ganglion.detail = update_value
-        ganglion.put()
-        self.response.out.write(ganglion.detail)
+        dump = Dump.get(key)
+        if not dump: self.error(404)
+        dump.detail = update_value
+        dump.put()
+        self.response.out.write(dump.detail)
 
 class GanglionSorter(webapp.RequestHandler):
 
@@ -261,6 +277,7 @@ class ViewHandler(webapp.RequestHandler):
 def main():
   application = webapp.WSGIApplication([('/', MainHandler),
                                         ('/dump',Dumper),
+                                        ('/dump/edit',DumpEdit),
                                         ('/dump/detail',DumpDetail),
                                         ('/dump/delete',Deleter),
                                         ('/ganglion/create',GanglionCreator),
