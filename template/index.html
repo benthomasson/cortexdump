@@ -5,6 +5,10 @@
 {
     float: left;
 }
+.floatright
+{
+    float: right;
+}
 #accordian
 {
     text-decoration: none
@@ -56,10 +60,16 @@ $(document).ready(function() {
 </script>
 </head>
 <body>
+<div class="floatright">
+{% if ganglion %} 
+<a href="/ganglion/{{ganglion.key}}"> [ This Page ] </a>
+{% else %}
+<a href="/"> [ This Page ] </a>
+{% endif %}
+</div>
 <h1>Cortex Dump</h1>
 <div id="ganglionList">
-{% if someGanglia %}
-<form id="ganglion" name="ganglion" action="/ganglion" method="post">
+<form class="floatleft" id="ganglion" name="ganglion" action="/ganglion" method="post">
     <select onChange="selectGanglion()" name="key">
     <option value="-">-</option>
     {% for aGanglion in ganglia %}
@@ -67,7 +77,6 @@ $(document).ready(function() {
     {% endfor %}
     </select>
 </form>
-{% endif %}
 <form action="/ganglion/create" method="post">
     <input type="submit" value="New Ganglion"/>
 </form>
