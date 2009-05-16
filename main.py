@@ -58,16 +58,27 @@ def getCortex(user):
     return cortex
 
 
+def getDefault(cortex):
+    default = cortex.default
+    if not default:
+        default = Ganglion()
+        default.name = "Cortex Dump"
+        default.user = cortex.user
+        default.put()
+        cortex.default = default
+        cortex.put()
+    return default
+
 class MainHandler(webapp.RequestHandler):
 
   def get(self):
     user = users.get_current_user()
     cortex = getCortex(user)
-    ganglion = None
-    dumps = Dump.all().filter('user =',user)
-    dumps = dumps.order('order')
+    ganglion = getDefault(cortex)
+    dumps = ganglion.dump_set.order('order')
     ganglia = Ganglion.all().filter('user =',user)
     someGanglia = ganglia.count() > 0
+    logout = users.create_logout_url('/')
     write_template(self,'template/index.html',\
         { 'dumps': dumps,
           'dumpsTemplate': getDumpsTemplate(cortex),
@@ -75,7 +86,8 @@ class MainHandler(webapp.RequestHandler):
           'ganglia': ganglia,
             'someGanglia':
             someGanglia,
-            'user': user, })
+            'user': user,
+            'logout': logout })
 
 
 class GanglionHandler(webapp.RequestHandler):
@@ -87,6 +99,7 @@ class GanglionHandler(webapp.RequestHandler):
         dumps = ganglion.dump_set.order('order')
         ganglia = Ganglion.all().filter('user =',user)
         someGanglia = ganglia.count() > 0
+        logout = users.create_logout_url('/')
         write_template(self,'template/index.html', \
             { 'dumps': dumps,
               'ganglion': ganglion,
@@ -94,7 +107,8 @@ class GanglionHandler(webapp.RequestHandler):
               'ganglia': ganglia,
                 'someGanglia':
                 someGanglia,
-                'user': user, })
+                'user': user,
+                'logout': logout})
 
     def post(self):
         user = users.get_current_user()
@@ -109,6 +123,7 @@ class GanglionHandler(webapp.RequestHandler):
             dumps = ganglion.dump_set.order('order')
             ganglia = Ganglion.all().filter('user =',user)
             someGanglia = ganglia.count() > 0
+            logout = users.create_logout_url('/')
             write_template(self,'template/index.html', \
                 { 'dumps': dumps,
                   'dumpsTemplate': getDumpsTemplate(cortex),
@@ -116,7 +131,8 @@ class GanglionHandler(webapp.RequestHandler):
                   'ganglia': ganglia,
                   'someGanglia':
                   someGanglia,
-                  'user': user, })
+                  'user': user, 
+                  'logout': logout})
         else:
             self.redirect('/')
 
@@ -201,6 +217,19 @@ class GanglionSorter(webapp.RequestHandler):
             order += 1
         logging.debug("%s items sorted" % order)
         return
+
+class GanglionByName(webapp.RequestHandler):
+
+    def get(self,name):
+        user = users.get_current_user()
+        ganglion = Ganglion().all().filter('user =', user).filter('name =', name)
+        ganglion = ganglion.fetch(1)
+        if not ganglion:
+            self.redirect('/')
+        else:
+            ganglion = ganglion[0]
+            self.redirect('/ganglion/%s' % ganglion.key())
+
 
 class GanglionCreator(webapp.RequestHandler):
 
@@ -303,6 +332,7 @@ def main():
                                         ('/ganglion/create',GanglionCreator),
                                         ('/ganglion/change',GanglionChange),
                                         ('/ganglion/sort/(.*)',GanglionSorter),
+                                        ('/ganglion/name/(.*)',GanglionByName),
                                         ('/ganglion/(.*)',GanglionHandler),
                                         ('/ganglion',GanglionHandler),
                                         ('/view/(.*)',ViewHandler),

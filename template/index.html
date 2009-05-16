@@ -73,6 +73,7 @@ $(document).ready(function() {
 {% else %}
 <a href="/"> [ This Page ] </a>
 {% endif %}
+<a href="{{ logout }}"> [ Logout ] </a>
 </div>
 {% if ganglion %} 
 <h2 class="editme">{{ganglion.name}}</h2>
@@ -116,9 +117,6 @@ $(document).ready(function() {
     <input type="submit" value="Detail"/>
 </form>
 </div>
-<div id="dumps">
-{% include dumpsTemplate %}
-</div>
 <form id="formdump" name="formdump" action="/dump" method="post">
     <input type="text" name="dumptext" id="dumptext" class="txt"/>
 {% if ganglion %} 
@@ -126,5 +124,8 @@ $(document).ready(function() {
 {% endif %}
     <input type="submit" value="Dump"/>
 </form>
+<div id="dumps">
+{% include dumpsTemplate %}
+</div>
 </body>
 </html>
