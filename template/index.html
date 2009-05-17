@@ -34,25 +34,32 @@ $(document).ready(function() {
         target:        '#dumps',   // target element(s) to be updated with server response 
         success:       clearForm 
     };
+    var options2 = { 
+        target:        '#dumps',   // target element(s) to be updated with server response 
+    };
     // bind to the form's submit event 
     $('#formdump').submit(function() { 
         $(this).ajaxSubmit(options);
         return false;
     });
     $('#mark').submit(function() { 
-        $(this).ajaxSubmit(options);
+        $(this).ajaxSubmit(options2);
         return false;
     });
     $('#order').submit(function() { 
-        $(this).ajaxSubmit(options);
+        $(this).ajaxSubmit(options2);
         return false;
     });
     $('#edit').submit(function() { 
-        $(this).ajaxSubmit(options);
+        $(this).ajaxSubmit(options2);
         return false;
     });
     $('#detail').submit(function() { 
-        $(this).ajaxSubmit(options);
+        $(this).ajaxSubmit(options2);
+        return false;
+    });
+    $('#ganglionDefault').submit(function() { 
+        $(this).ajaxSubmit();
         return false;
     });
     document.formdump.dumptext.focus();
@@ -80,18 +87,23 @@ $(document).ready(function() {
 {% else %}
 <h1>Cortex Dump</h1>
 {% endif %}
-<div id="ganglionList">
-<form class="floatright" id="ganglion" name="ganglion" action="/ganglion" method="post">
+<div id="ganglionList" class="floatright">
+<form id="ganglionDefault" class="floatright" action="/ganglion/default" method="post">
+    <input type="hidden" name="key" value="{{ganglion.key}}"/>
+    <input type="submit" value="Default"/>
+</form>
+<form class="floatright" action="/ganglion/create" method="post">
+    <input type="submit" value="New Ganglion"/>
+</form>
+<form class="floatright" id="ganglion" name="ganglion" action="/ganglion" method="get">
     <select onChange="selectGanglion()" name="key">
-    <option value="-">-</option>
     {% for aGanglion in ganglia %}
         <option value="{{aGanglion.key}}" {% ifequal aGanglion.key ganglion.key %} SELECTED {%endifequal%}>{{aGanglion.name}}</option>
     {% endfor %}
     </select>
 </form>
-<form class="floatright" action="/ganglion/create" method="post">
-    <input type="submit" value="New Ganglion"/>
-</form>
+</div>
+<div id="dumpMenu">
 <form id="mark" class="floatleft" action="/view/mark" method="post">
 {% if ganglion %} 
     <input type="hidden" name="ganglion" value="{{ganglion.key}}"/>

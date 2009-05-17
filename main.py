@@ -110,31 +110,17 @@ class GanglionHandler(webapp.RequestHandler):
                 'user': user,
                 'logout': logout})
 
-    def post(self):
-        user = users.get_current_user()
+class GanglionHandler2(webapp.RequestHandler):
+
+    def get(self):
         key = self.request.get('key')
-        cortex = getCortex(user)
         if key:
-            try:
-                ganglion = Ganglion().get(key)
-            except Exception:
-                self.redirect('/')
-                return
-            dumps = ganglion.dump_set.order('order')
-            ganglia = Ganglion.all().filter('user =',user)
-            someGanglia = ganglia.count() > 0
-            logout = users.create_logout_url('/')
-            write_template(self,'template/index.html', \
-                { 'dumps': dumps,
-                  'dumpsTemplate': getDumpsTemplate(cortex),
-                  'ganglion': ganglion,
-                  'ganglia': ganglia,
-                  'someGanglia':
-                  someGanglia,
-                  'user': user, 
-                  'logout': logout})
+            self.redirect('/ganglion/%s' % key)
         else:
             self.redirect('/')
+
+    def post(self):
+        self.get()
 
 
 class GanglionChange(webapp.RequestHandler):
@@ -149,6 +135,19 @@ class GanglionChange(webapp.RequestHandler):
         ganglion.name = update_value
         ganglion.put()
         self.response.out.write(ganglion.name)
+
+class GanglionDefault(webapp.RequestHandler):
+
+    def post(self):
+        key = self.request.get('key')
+        if not key: self.error(404)
+        user = users.get_current_user()
+        cortex = getCortex(user)
+        ganglion = Ganglion.get(key)
+        if not ganglion: self.error(404)
+        cortex.default = ganglion
+        cortex.put()
+
 
 class DumpEdit(webapp.RequestHandler):
 
@@ -331,10 +330,11 @@ def main():
                                         ('/dump/delete',Deleter),
                                         ('/ganglion/create',GanglionCreator),
                                         ('/ganglion/change',GanglionChange),
+                                        ('/ganglion/default',GanglionDefault),
                                         ('/ganglion/sort/(.*)',GanglionSorter),
                                         ('/ganglion/name/(.*)',GanglionByName),
                                         ('/ganglion/(.*)',GanglionHandler),
-                                        ('/ganglion',GanglionHandler),
+                                        ('/ganglion',GanglionHandler2),
                                         ('/view/(.*)',ViewHandler),
                                         #('/migrate',Migration),
                                         ],
