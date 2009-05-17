@@ -37,6 +37,11 @@ $(document).ready(function() {
     var options2 = { 
         target:        '#dumps',   // target element(s) to be updated with server response 
     };
+    {% if showChecked %} 
+    var toggle = true;
+    {% else %}
+    var toggle = false;
+    {% endif %}
     // bind to the form's submit event 
     $('#formdump').submit(function() { 
         $(this).ajaxSubmit(options);
@@ -56,6 +61,20 @@ $(document).ready(function() {
     });
     $('#detail').submit(function() { 
         $(this).ajaxSubmit(options2);
+        return false;
+    });
+    $('#toggleChecked').submit(function() { 
+        if (toggle) {
+            $(this).ajaxSubmit(options2);
+            toggle = false;
+            $('#toggleChecked').get(0).submit.value = "Show Checked";
+            $('#toggleChecked').get(0).toggle.value = "show";
+        } else {
+            $(this).ajaxSubmit(options2);
+            toggle = true;
+            $('#toggleChecked').get(0).submit.value = "Hide Checked";
+            $('#toggleChecked').get(0).toggle.value = "hide";
+        }
         return false;
     });
     $('#ganglionDefault').submit(function() { 
@@ -122,11 +141,21 @@ $(document).ready(function() {
 {% endif %}
     <input type="submit" value="Edit"/>
 </form>
-<form id="detail" action="/view/detail" method="post">
+<form id="detail" class="floatleft" action="/view/detail" method="post">
 {% if ganglion %} 
     <input type="hidden" name="ganglion" value="{{ganglion.key}}"/>
 {% endif %}
     <input type="submit" value="Detail"/>
+</form>
+<form id="toggleChecked" action="/ganglion/toggleChecked" method="post">
+    <input type="hidden" name="key" value="{{ganglion.key}}"/>
+    {% if showChecked %} 
+    <input type="submit" name="submit" value="Hide Checked"/>
+    <input type="hidden" name="toggle" value="hide"/>
+    {% else %}
+    <input type="submit" name="submit" value="Show Checked"/>
+    <input type="hidden" name="toggle" value="show"/>
+    {% endif %}
 </form>
 </div>
 <form id="formdump" name="formdump" action="/dump" method="post">

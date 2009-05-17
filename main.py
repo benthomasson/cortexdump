@@ -69,18 +69,30 @@ def getDefault(cortex):
         cortex.put()
     return default
 
+def getDumps(ganglion):
+    user = users.get_current_user()
+    cortex = getCortex(user)
+    if cortex.showChecked:
+        logging.debug('Showing checked')
+        return ganglion.dump_set.order('order')
+    else:
+        logging.debug('Hiding checked')
+        return ganglion.dump_set.filter('checked =', False).order('order')
+
+
 class MainHandler(webapp.RequestHandler):
 
   def get(self):
     user = users.get_current_user()
     cortex = getCortex(user)
     ganglion = getDefault(cortex)
-    dumps = ganglion.dump_set.order('order')
+    dumps = getDumps(ganglion)
     ganglia = Ganglion.all().filter('user =',user)
     someGanglia = ganglia.count() > 0
     logout = users.create_logout_url('/')
     write_template(self,'template/index.html',\
         { 'dumps': dumps,
+          'showChecked': cortex.showChecked,
           'dumpsTemplate': getDumpsTemplate(cortex),
           'ganglion': ganglion,
           'ganglia': ganglia,
@@ -96,13 +108,14 @@ class GanglionHandler(webapp.RequestHandler):
         user = users.get_current_user()
         cortex = getCortex(user)
         ganglion = Ganglion().get(key)
-        dumps = ganglion.dump_set.order('order')
+        dumps = getDumps(ganglion)
         ganglia = Ganglion.all().filter('user =',user)
         someGanglia = ganglia.count() > 0
         logout = users.create_logout_url('/')
         write_template(self,'template/index.html', \
             { 'dumps': dumps,
               'ganglion': ganglion,
+              'showChecked': cortex.showChecked,
               'dumpsTemplate': getDumpsTemplate(cortex),
               'ganglia': ganglia,
                 'someGanglia':
@@ -147,6 +160,30 @@ class GanglionDefault(webapp.RequestHandler):
         if not ganglion: self.error(404)
         cortex.default = ganglion
         cortex.put()
+
+class ToggleChecked(webapp.RequestHandler):
+
+    def post(self):
+        logging.debug('ToggleChecked ' + repr(self.request.arguments()))
+        toggle = self.request.get('toggle')
+        user = users.get_current_user()
+        cortex = getCortex(user)
+        if toggle == "hide":
+            cortex.showChecked = False
+        elif toggle == "show":
+            cortex.showChecked = True
+        else:
+            self.error(404)
+        cortex.put()
+        key = self.request.get('key')
+        if not key: self.error(404)
+        ganglion = Ganglion.get(key)
+        if not ganglion: self.error(404)
+        dumps = getDumps(ganglion)
+        write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
+            { 'dumps': dumps,
+              'ganglion': ganglion,
+              'user': user, })
 
 
 class DumpEdit(webapp.RequestHandler):
@@ -242,11 +279,12 @@ class GanglionCreator(webapp.RequestHandler):
 class Dumper(webapp.RequestHandler):
 
     def post(self):
-        ganglion = None
         text = self.request.get('dumptext')
         ganglionKey = self.request.get('ganglion')
         if ganglionKey:
             ganglion = Ganglion.get(ganglionKey)
+        else:
+            self.error(404)
         user = users.get_current_user()
         cortex = getCortex(user)
         if text:
@@ -255,10 +293,7 @@ class Dumper(webapp.RequestHandler):
             if ganglion and ganglion.user == user:
                 dump.ganglion = ganglion
             dump.processNewText(text)
-        if ganglion:
-            dumps = ganglion.dump_set.order('order')
-        else:
-            dumps = Dump.all().filter('user =',user)
+        dumps = getDumps(ganglion)
         write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
             { 'dumps': dumps,
               'ganglion': ganglion,
@@ -309,12 +344,10 @@ class ViewHandler(webapp.RequestHandler):
         cortex.put()
         ganglionKey = self.request.get('ganglion')
         ganglion = None
-        if ganglionKey:
-            ganglion = Ganglion.get(ganglionKey)
-        if ganglion:
-            dumps = ganglion.dump_set.order('order')
-        else:
-            dumps = Dump.all().filter('user =',user)
+        if not ganglionKey: self.error(404)
+        ganglion = Ganglion.get(ganglionKey)
+        if not ganglion: self.error(404)
+        dumps = getDumps(ganglion)
         write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
             { 'dumps': dumps,
               'ganglion': ganglion,
@@ -330,6 +363,7 @@ def main():
                                         ('/dump/delete',Deleter),
                                         ('/ganglion/create',GanglionCreator),
                                         ('/ganglion/change',GanglionChange),
+                                        ('/ganglion/toggleChecked',ToggleChecked),
                                         ('/ganglion/default',GanglionDefault),
                                         ('/ganglion/sort/(.*)',GanglionSorter),
                                         ('/ganglion/name/(.*)',GanglionByName),
