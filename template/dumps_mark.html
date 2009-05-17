@@ -1,15 +1,8 @@
-<script type="text/javascript"> 
-function dumpChecked(input) {
-    var id = input.attr("id");
-    var checked = input.attr("checked");
-    $.post('/dump/checked',{ id: id, checked: checked });
-}
-</script> 
 <p>( 'x' deletes, checkbox - checks)</p>
 <ul style="list-style-type:none">
 {% for dump in dumps %}
 <li class="dump" key="{{dump.key}}" id="dump_{{dump.key}}">
-<input id="{{dump.key}}" type="checkbox" {%if dump.checked %} checked="yes" {%endif%} onclick="dumpChecked($(this));">
+<input class="checked" id="{{dump.key}}" type="checkbox" {%if dump.checked %} checked="yes" {%endif%}>
 {{dump.getHtml}} <a class="x" href="">x</a>
 </li>
 {% endfor %}
@@ -21,6 +14,14 @@ $(document).ready(function() {
            $.post("/dump/delete", { key: $(this).parent().attr("key") } );
            $(this).parent().slideUp();
            return false;
+    });
+    $(".checked").click(function (input) {
+        var id = $(this).get(0).id;
+        var checked = $(this).get(0).checked;
+        $.post('/dump/checked',{ id: id, checked: checked });
+        {% if not showChecked %} 
+        $(this).parent().slideUp();
+        {% endif %}
     });
 });
 </script> 

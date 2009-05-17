@@ -183,6 +183,7 @@ class ToggleChecked(webapp.RequestHandler):
         write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
             { 'dumps': dumps,
               'ganglion': ganglion,
+              'showChecked': cortex.showChecked,
               'user': user, })
 
 
@@ -296,6 +297,7 @@ class Dumper(webapp.RequestHandler):
         dumps = getDumps(ganglion)
         write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
             { 'dumps': dumps,
+              'showChecked': cortex.showChecked,
               'ganglion': ganglion,
               'user': user, })
 
