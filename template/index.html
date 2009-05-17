@@ -88,12 +88,12 @@ $(document).ready(function() {
 <h1>Cortex Dump</h1>
 {% endif %}
 <div id="ganglionList" class="floatright">
+<form class="floatright" action="/ganglion/create" method="post">
+    <input type="submit" value="New List"/>
+</form>
 <form id="ganglionDefault" class="floatright" action="/ganglion/default" method="post">
     <input type="hidden" name="key" value="{{ganglion.key}}"/>
     <input type="submit" value="Default"/>
-</form>
-<form class="floatright" action="/ganglion/create" method="post">
-    <input type="submit" value="New Ganglion"/>
 </form>
 <form class="floatright" id="ganglion" name="ganglion" action="/ganglion" method="get">
     <select onChange="selectGanglion()" name="key">
