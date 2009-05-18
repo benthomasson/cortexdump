@@ -22,7 +22,7 @@ indexes:
   - name: ganglion
   - name: order
 
-# Used 418 times in query history.
+# Used 419 times in query history.
 - kind: Dump
   properties:
   - name: ganglion
@@ -35,7 +35,7 @@ indexes:
   - name: user
   - name: order
 
-# Used 12 times in query history.
+# Used 14 times in query history.
 - kind: Ganglion
   properties:
   - name: user
