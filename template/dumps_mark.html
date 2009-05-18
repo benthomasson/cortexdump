@@ -19,9 +19,6 @@ $(document).ready(function() {
         var id = $(this).get(0).id;
         var checked = $(this).get(0).checked;
         $.post('/dump/checked',{ id: id, checked: checked });
-        {% if not showChecked %} 
-        $(this).parent().slideUp();
-        {% endif %}
     });
 });
 </script> 

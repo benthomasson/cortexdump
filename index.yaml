@@ -15,14 +15,14 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 163 times in query history.
+# Used 177 times in query history.
 - kind: Dump
   properties:
   - name: checked
   - name: ganglion
   - name: order
 
-# Used 376 times in query history.
+# Used 390 times in query history.
 - kind: Dump
   properties:
   - name: ganglion

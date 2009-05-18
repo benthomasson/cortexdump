@@ -32,6 +32,9 @@ class Dump(db.Model):
         text = re.sub(r'(http://[\S]+)',r'<a href="\1">\1</a>',text)
         text = re.sub(r'^(/([\S]+))',self.findGanglionLink,text)
         text = re.sub(r'(\s/([\S]+))',self.findGanglionLink,text)
+        text = re.sub(r'^!!!(.*)$',r'<h1>\1</h1>',text)
+        text = re.sub(r'^!!(.*)$',r'<h2>\1</h2>',text)
+        text = re.sub(r'^!(.*)$',r'<h3>\1</h3>',text)
         self.html = text
         self.put()
 

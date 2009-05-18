@@ -239,20 +239,20 @@ class GanglionSorter(webapp.RequestHandler):
         user = users.get_current_user()
         ganglion = Ganglion().get(key)
         if not ganglion:
-            logging.debug("Cannot find ganglion %s" % key)
+            logging.error("Cannot find ganglion %s" % key)
             return
-        logging.debug("Sorting %s" % key)
+        #logging.debug("Sorting %s" % key)
         #logging.debug(repr(self.request.arguments()))
         order = 1
         for dumpKey in self.request.get_all('dump[]'):
-            logging.debug(dumpKey)
+            #logging.debug(dumpKey)
             dump = Dump.get(dumpKey)
             if dump:
-                logging.debug("order %s" % order)
+                #logging.debug("order %s" % order)
                 dump.order = order
                 dump.put()
             order += 1
-        logging.debug("%s items sorted" % order)
+        #logging.debug("%s items sorted" % order)
         return
 
 class GanglionByName(webapp.RequestHandler):
