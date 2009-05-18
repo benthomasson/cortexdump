@@ -13,7 +13,7 @@ class Cortex(db.Model):
 
 class Dump(db.Model):
     text = db.StringProperty()
-    html = db.StringProperty()
+    html = db.TextProperty()
     user = db.UserProperty()
     order = db.IntegerProperty(default=0)
     ganglion = db.ReferenceProperty(Ganglion)

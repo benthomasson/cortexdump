@@ -159,7 +159,7 @@ $(document).ready(function() {
 </form>
 </div>
 <form id="formdump" name="formdump" action="/dump" method="post">
-    <input type="text" name="dumptext" id="dumptext" class="txt"/>
+    <input type="text" name="dumptext" id="dumptext" class="txt" size="80" maxlength="500"/>
 {% if ganglion %} 
     <input type="hidden" name="ganglion" value="{{ganglion.key}}"/>
 {% endif %}
