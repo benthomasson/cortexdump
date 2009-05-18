@@ -87,7 +87,7 @@ class MainHandler(webapp.RequestHandler):
     cortex = getCortex(user)
     ganglion = getDefault(cortex)
     dumps = getDumps(ganglion)
-    ganglia = Ganglion.all().filter('user =',user)
+    ganglia = Ganglion.all().filter('user =',user).order('name')
     someGanglia = ganglia.count() > 0
     logout = users.create_logout_url('/')
     write_template(self,'template/index.html',\
@@ -109,7 +109,7 @@ class GanglionHandler(webapp.RequestHandler):
         cortex = getCortex(user)
         ganglion = Ganglion().get(key)
         dumps = getDumps(ganglion)
-        ganglia = Ganglion.all().filter('user =',user)
+        ganglia = Ganglion.all().filter('user =',user).order('name')
         someGanglia = ganglia.count() > 0
         logout = users.create_logout_url('/')
         write_template(self,'template/index.html', \
