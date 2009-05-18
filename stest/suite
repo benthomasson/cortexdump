@@ -12,6 +12,10 @@
 <tr><td><a href="changetitle">changetitle</a></td></tr>
 <tr><td><a href="logout">logout</a></td></tr>
 <tr><td><a href="thispage">thispage</a></td></tr>
+<tr><td><a href="newlist">newlist</a></td></tr>
+<tr><td><a href="changemodes">change modes</a></td></tr>
+<tr><td><a href="slashnote">slashnote</a></td></tr>
+<tr><td><a href="bignotes">Big Notes</a></td></tr>
 </tbody></table>
 </body>
 </html>
