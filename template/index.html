@@ -82,7 +82,7 @@ $(document).ready(function() {
         return false;
     });
     $('#ganglionDefault').submit(function() { 
-        $(this).ajaxSubmit();
+        $(this).ajaxSubmit({ success: setFocus });
         return false;
     });
     document.formdump.dumptext.focus();
