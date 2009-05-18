@@ -22,6 +22,9 @@ body
 <script type="text/javascript" src="/static/jquery.form.js"></script>
 <script type="text/javascript" src="/static/jquery.editinplace.js"></script>
 <script type="text/javascript">
+function setFocus() {
+    document.formdump.dumptext.focus();
+}
 function clearForm() {
     document.formdump.dumptext.value="";
     document.formdump.dumptext.focus();
@@ -36,6 +39,7 @@ $(document).ready(function() {
     };
     var options2 = { 
         target:        '#dumps',   // target element(s) to be updated with server response 
+        success:       setFocus 
     };
     {% if showChecked %} 
     var toggle = true;
