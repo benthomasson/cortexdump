@@ -111,6 +111,9 @@ class GanglionHandler(webapp.RequestHandler):
         user = users.get_current_user()
         cortex = getCortex(user)
         ganglion = Ganglion().get(key)
+        if not ganglion:
+            self.error(404)
+            return
         if not ganglion.checkUser():
             self.error(404)
             return
@@ -323,11 +326,11 @@ class GanglionByName(webapp.RequestHandler):
         ganglion = ganglion.fetch(1)
         if not ganglion:
             self.redirect('/')
-        elif not ganglion.checkUser():
-            self.error(404)
-            return
         else:
             ganglion = ganglion[0]
+            if not ganglion.checkUser():
+                self.error(404)
+                return
             self.redirect('/ganglion/%s' % ganglion.key())
 
 
