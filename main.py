@@ -86,6 +86,9 @@ class MainHandler(webapp.RequestHandler):
     user = users.get_current_user()
     cortex = getCortex(user)
     ganglion = getDefault(cortex)
+    if not ganglion.checkUser():
+        self.error(404)
+        return
     dumps = getDumps(ganglion)
     ganglia = Ganglion.all().filter('user =',user).order('name')
     someGanglia = ganglia.count() > 0
@@ -108,6 +111,9 @@ class GanglionHandler(webapp.RequestHandler):
         user = users.get_current_user()
         cortex = getCortex(user)
         ganglion = Ganglion().get(key)
+        if not ganglion.checkUser():
+            self.error(404)
+            return
         dumps = getDumps(ganglion)
         ganglia = Ganglion.all().filter('user =',user).order('name')
         someGanglia = ganglia.count() > 0
@@ -140,11 +146,20 @@ class GanglionChange(webapp.RequestHandler):
 
     def post(self):
         key = self.request.get('key')
-        if not key: self.error(404)
+        if not key: 
+            self.error(404)
+            return
         update_value = self.request.get('update_value')
-        if not update_value: self.error(404)
+        if not update_value: 
+            self.error(404)
+            return
         ganglion = Ganglion.get(key)
-        if not ganglion: self.error(404)
+        if not ganglion: 
+            self.error(404)
+            return
+        if not ganglion.checkUser():
+            self.error(404)
+            return
         ganglion.name = update_value
         ganglion.put()
         self.response.out.write(ganglion.name)
@@ -153,11 +168,18 @@ class GanglionDefault(webapp.RequestHandler):
 
     def post(self):
         key = self.request.get('key')
-        if not key: self.error(404)
+        if not key: 
+            self.error(404)
+            return
+        ganglion = Ganglion.get(key)
+        if not ganglion: 
+            self.error(404)
+            return
+        if not ganglion.checkUser():
+            self.error(404)
+            return
         user = users.get_current_user()
         cortex = getCortex(user)
-        ganglion = Ganglion.get(key)
-        if not ganglion: self.error(404)
         cortex.default = ganglion
         cortex.put()
 
@@ -174,11 +196,19 @@ class ToggleChecked(webapp.RequestHandler):
             cortex.showChecked = True
         else:
             self.error(404)
+            return
         cortex.put()
         key = self.request.get('key')
-        if not key: self.error(404)
+        if not key: 
+            self.error(404)
+            return
         ganglion = Ganglion.get(key)
-        if not ganglion: self.error(404)
+        if not ganglion: 
+            self.error(404)
+            return
+        if not ganglion.checkUser():
+            self.error(404)
+            return
         dumps = getDumps(ganglion)
         write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
             { 'dumps': dumps,
@@ -192,11 +222,20 @@ class DumpEdit(webapp.RequestHandler):
     def post(self):
         key = self.request.get('element_id')
         logging.debug('key ' + key)
-        if not key: self.error(404)
+        if not key: 
+            self.error(404)
+            return
         update_value = self.request.get('update_value')
-        if not update_value: self.error(404)
+        if not update_value: 
+            self.error(404)
+            return
         dump = Dump.get(key)
-        if not dump: self.error(404)
+        if not dump: 
+            self.error(404)
+            return
+        if not dump.ganglion.checkUser():
+            self.error(404)
+            return
         dump.processNewText(update_value)
         self.response.out.write(dump.text)
 
@@ -206,12 +245,21 @@ class DumpChecked(webapp.RequestHandler):
     def post(self):
         key = self.request.get('id')
         logging.debug('key ' + key)
-        if not key: self.error(404)
+        if not key: 
+            self.error(404)
+            return
         checked = self.request.get('checked')
         logging.debug('checked ' + checked)
-        if not checked: self.error(404)
+        if not checked: 
+            self.error(404)
+            return
         dump = Dump.get(key)
-        if not dump: self.error(404)
+        if not dump: 
+            self.error(404)
+            return
+        if not dump.ganglion.checkUser():
+            self.error(404)
+            return
         if checked == "true":
             dump.checked = True 
         else:
@@ -224,11 +272,20 @@ class DumpDetail(webapp.RequestHandler):
     def post(self):
         key = self.request.get('element_id')
         logging.debug('key ' + key)
-        if not key: self.error(404)
+        if not key: 
+            self.error(404)
+            return
         update_value = self.request.get('update_value')
-        if not update_value: self.error(404)
+        if not update_value: 
+            self.error(404)
+            return
         dump = Dump.get(key)
-        if not dump: self.error(404)
+        if not dump: 
+            self.error(404)
+            return
+        if not dump.ganglion.checkUser():
+            self.error(404)
+            return
         dump.detail = update_value
         dump.put()
         self.response.out.write(dump.detail)
@@ -240,6 +297,9 @@ class GanglionSorter(webapp.RequestHandler):
         ganglion = Ganglion().get(key)
         if not ganglion:
             logging.error("Cannot find ganglion %s" % key)
+            return
+        if not ganglion.checkUser():
+            self.error(404)
             return
         #logging.debug("Sorting %s" % key)
         #logging.debug(repr(self.request.arguments()))
@@ -263,6 +323,9 @@ class GanglionByName(webapp.RequestHandler):
         ganglion = ganglion.fetch(1)
         if not ganglion:
             self.redirect('/')
+        elif not ganglion.checkUser():
+            self.error(404)
+            return
         else:
             ganglion = ganglion[0]
             self.redirect('/ganglion/%s' % ganglion.key())
@@ -286,6 +349,10 @@ class Dumper(webapp.RequestHandler):
             ganglion = Ganglion.get(ganglionKey)
         else:
             self.error(404)
+            return
+        if not ganglion.checkUser():
+            self.error(404)
+            return
         user = users.get_current_user()
         cortex = getCortex(user)
         if text:
@@ -305,25 +372,15 @@ class Dumper(webapp.RequestHandler):
         return self.post()
 
 
-class DumpChange(webapp.RequestHandler):
-
-    def post(self):
-        key = self.request.get('key')
-        if not key: self.error(404)
-        update_value = self.request.get('update_value')
-        if not update_value: self.error(404)
-        dump = Dump.get(key)
-        if not ganglion: self.error(404)
-        ganglion.name = update_value
-        ganglion.put()
-        self.response.out.write(ganglion.name)
-
 class Deleter(webapp.RequestHandler):
 
     def post(self):
         key = self.request.get('key')
         if key:
             dump = Dump().get(key)
+            if not dump.ganglion.checkUser():
+                self.error(404)
+                return
             if dump and dump.user == users.get_current_user():
                 dump.delete()
 
@@ -346,9 +403,16 @@ class ViewHandler(webapp.RequestHandler):
         cortex.put()
         ganglionKey = self.request.get('ganglion')
         ganglion = None
-        if not ganglionKey: self.error(404)
+        if not ganglionKey: 
+            self.error(404)
+            return
         ganglion = Ganglion.get(ganglionKey)
-        if not ganglion: self.error(404)
+        if not ganglion: 
+            self.error(404)
+            return
+        if not ganglion.checkUser():
+            self.error(404)
+            return
         dumps = getDumps(ganglion)
         write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
             { 'dumps': dumps,

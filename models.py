@@ -1,9 +1,25 @@
 from google.appengine.ext import db
+from google.appengine.api import users
 import re
+import logging
 
 class Ganglion(db.Model):
     name = db.StringProperty()
     user = db.UserProperty()
+    users = db.ListProperty(users.User)
+
+    def checkUser(self):
+        user = users.get_current_user()
+        logging.debug('checking %s' % user)
+        if user == self.user:
+            logging.debug('%s is owner %s' % (user,self.user))
+            return True
+        elif user in self.users:
+            logging.debug('%s is member %s' % (user,repr(self.users)))
+            return True
+        else:
+            logging.debug('%s is not a member %s' % (user,repr(self.users)))
+            return False
 
 class Cortex(db.Model):
     user = db.UserProperty()
