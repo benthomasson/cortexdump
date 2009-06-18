@@ -27,11 +27,21 @@ import os
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 import logging
+import re
 
 from models import Dump, Ganglion, Cortex
 
+
+_IPHONE_UA = re.compile(r'Mobile.*Safari')
+def is_iphone(request):
+    return _IPHONE_UA.search(request.headers['USER_AGENT']) is not None
+
 def write_template(handler,templateFile,template_values):
-    path = os.path.join(os.path.dirname(__file__), templateFile)
+    logging.debug('is_iphone %s' % is_iphone(handler.request))
+    if is_iphone(handler.request):
+        path = os.path.join(os.path.dirname(__file__), 'template', 'iphone', templateFile)
+    else:
+        path = os.path.join(os.path.dirname(__file__), 'template', templateFile)
     handler.response.out.write(template.render(path, template_values))
 
 def getDumpsTemplate(cortex):
@@ -93,7 +103,7 @@ class MainHandler(webapp.RequestHandler):
     ganglia = Ganglion.all().filter('user =',user).order('name')
     someGanglia = ganglia.count() > 0
     logout = users.create_logout_url('/')
-    write_template(self,'template/index.html',\
+    write_template(self,'index.html',\
         { 'dumps': dumps,
           'showChecked': cortex.showChecked,
           'dumpsTemplate': getDumpsTemplate(cortex),
@@ -121,7 +131,7 @@ class GanglionHandler(webapp.RequestHandler):
         ganglia = Ganglion.all().filter('user =',user).order('name')
         someGanglia = ganglia.count() > 0
         logout = users.create_logout_url('/')
-        write_template(self,'template/index.html', \
+        write_template(self,'index.html', \
             { 'dumps': dumps,
               'ganglion': ganglion,
               'showChecked': cortex.showChecked,
@@ -213,7 +223,7 @@ class ToggleChecked(webapp.RequestHandler):
             self.error(404)
             return
         dumps = getDumps(ganglion)
-        write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
+        write_template(self, getDumpsTemplate(cortex), \
             { 'dumps': dumps,
               'ganglion': ganglion,
               'showChecked': cortex.showChecked,
@@ -365,7 +375,7 @@ class Dumper(webapp.RequestHandler):
                 dump.ganglion = ganglion
             dump.processNewText(text)
         dumps = getDumps(ganglion)
-        write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
+        write_template(self, getDumpsTemplate(cortex), \
             { 'dumps': dumps,
               'showChecked': cortex.showChecked,
               'ganglion': ganglion,
@@ -417,7 +427,7 @@ class ViewHandler(webapp.RequestHandler):
             self.error(404)
             return
         dumps = getDumps(ganglion)
-        write_template(self, os.path.join("template", getDumpsTemplate(cortex)), \
+        write_template(self, getDumpsTemplate(cortex), \
             { 'dumps': dumps,
               'ganglion': ganglion,
               'user': user, })

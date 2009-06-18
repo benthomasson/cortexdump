@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>{{ganglion.name}}</title>
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+<link rel="apple-touch-icon" href="/static/iui/iui-logo-touch-icon.png" />
+<meta name="apple-touch-fullscreen" content="YES" />
+<style type="text/css" media="screen">@import "/static/iui/iui.css";</style>
+<script type="application/x-javascript" src="/static/iui/iui.js"></script>
+<!--
+<script type="application/x-javascript" src="http://10.0.1.2:1840/ibug.js"></script>
+-->
+<script type="text/javascript">
+function selectGanglion() {
+    document.ganglion.submit();
+}
+</script>
+</head>
+
+<body onclick="console.log('Hello', event.target);">
+    <div class="toolbar">
+        <h1 id="pageTitle"></h1>
+        <a id="backButton" class="button" href="#"></a>
+        <form id="ganglion" name="ganglion" action="/ganglion" method="get">
+        <select onChange="selectGanglion()" name="key">
+            {% for aGanglion in ganglia %}
+                <option value="{{aGanglion.key}}" {% ifequal aGanglion.key ganglion.key %} SELECTED {%endifequal%}>{{aGanglion.name}}</option>
+            {% endfor %}
+        </select>
+        </form>
+    </div>
+    
+    <ul id="home" title="{{ganglion.name}}" selected="true">
+        {% for dump in dumps %}
+        <li> {{dump.text}} </li>
+        {% endfor %}
+    </ul>
+    
+</body>
+</html>
