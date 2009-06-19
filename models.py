@@ -45,7 +45,7 @@ class Dump(db.Model):
 
     def processNewText(self,text):
         self.text = text
-        text = re.sub(r'(http://[\S]+)',r'<a href="\1">\1</a>',text)
+        text = re.sub(r'(http://[\S]+)',r'<a href="\1" target="_blank">\1</a>',text)
         text = re.sub(r'^(/([\S]+))',self.findGanglionLink,text)
         text = re.sub(r'(\s/([\S]+))',self.findGanglionLink,text)
         text = re.sub(r'^!!!(.*)$',r'<font size="+4">\1</font>',text)

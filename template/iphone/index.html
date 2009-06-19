@@ -21,10 +21,9 @@ function selectGanglion() {
 
 <body onclick="console.log('Hello', event.target);">
     <div class="toolbar">
-        <h1 id="pageTitle"></h1>
         <a id="backButton" class="button" href="#"></a>
         <form id="ganglion" name="ganglion" action="/ganglion" method="get">
-        <select onChange="selectGanglion()" name="key">
+        <select onChange="selectGanglion()" name="key" style="font-size: 1.0em; margin: 0 4.5em">
             {% for aGanglion in ganglia %}
                 <option value="{{aGanglion.key}}" {% ifequal aGanglion.key ganglion.key %} SELECTED {%endifequal%}>{{aGanglion.name}}</option>
             {% endfor %}
@@ -34,9 +33,26 @@ function selectGanglion() {
     
     <ul id="home" title="{{ganglion.name}}" selected="true">
         {% for dump in dumps %}
-        <li> {{dump.text}} </li>
+        <li> <a href="#{{dump.key}}">{{dump.html}}</a> </li>
         {% endfor %}
     </ul>
+
+    {% for dump in dumps %}
+    
+    <form id="{{dump.key}}" class="dialog" action="">
+        <fieldset>
+            <h1>Edit</h1>
+            <a class="button leftButton" type="cancel">Cancel</a>
+            <a class="button blueButton" type="submit">Edit</a>
+            <label>Text</label>
+            <input id="artist" type="text" name="artist" value="{{dump.text}}" />
+            <label>Detail</label>
+            <textarea rows="10">
+            {{dump.detail}}
+            </textarea>
+        </fieldset>
+    </form>
+    {% endfor %}
     
 </body>
 </html>

@@ -34,7 +34,11 @@ from models import Dump, Ganglion, Cortex
 
 _IPHONE_UA = re.compile(r'Mobile.*Safari')
 def is_iphone(request):
-    return _IPHONE_UA.search(request.headers['USER_AGENT']) is not None
+    if request.headers.has_key('USER_AGENT'):
+        logging.debug( "USER_AGENT %s" % request.headers['USER_AGENT'])
+        return _IPHONE_UA.search(request.headers['USER_AGENT']) is not None
+    else:
+        return False
 
 def write_template(handler,templateFile,template_values):
     logging.debug('is_iphone %s' % is_iphone(handler.request))
