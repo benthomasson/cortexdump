@@ -33,7 +33,11 @@ function selectGanglion() {
     
     <ul id="home" title="{{ganglion.name}}" selected="true">
         {% for dump in dumps %}
+        {% if dump.html %}
         <li> <a href="#{{dump.key}}">{{dump.html}}</a> </li>
+        {% else %}
+        <li> <a href="#{{dump.key}}">{{dump.text}}</a> </li>
+        {% endif %}
         {% endfor %}
     </ul>
 
@@ -48,7 +52,9 @@ function selectGanglion() {
             <input id="artist" type="text" name="artist" value="{{dump.text}}" />
             <label>Detail</label>
             <textarea rows="10">
+            {% if dump.detail %}
             {{dump.detail}}
+            {% endif %}
             </textarea>
         </fieldset>
     </form>
